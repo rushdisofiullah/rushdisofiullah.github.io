@@ -33,56 +33,167 @@ function TypingText({ texts }: { texts: string[] }) {
 }
 
 function RadarSVG() {
+  // Blips placed on outer rings r=120-155 = "high value" zone near the perimeter
+  const blips = [
+    { angle: 38,  r: 148, size: 4.5, color: '#00c8a0', cls: 'bp1', ring: true  },
+    { angle: 112, r: 138, size: 3.5, color: '#0074e8', cls: 'bp2', ring: true  },
+    { angle: 195, r: 152, size: 4.0, color: '#7b4fff', cls: 'bp3', ring: true  },
+    { angle: 260, r: 142, size: 3.0, color: '#ff6b35', cls: 'bp4', ring: false },
+    { angle: 315, r: 150, size: 3.5, color: '#00c8a0', cls: 'bp5', ring: true  },
+    { angle: 70,  r: 125, size: 3.0, color: '#7b4fff', cls: 'bp6', ring: false },
+    { angle: 160, r: 132, size: 2.5, color: '#0074e8', cls: 'bp7', ring: false },
+  ];
+
+  // Polar to cartesian: 0deg = top, clockwise
+  const polar = (angleDeg: number, radius: number) => {
+    const rad = ((angleDeg - 90) * Math.PI) / 180;
+    return { x: 200 + radius * Math.cos(rad), y: 200 + radius * Math.sin(rad) };
+  };
+
   return (
     <svg viewBox="0 0 400 400" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <radialGradient id="radarGrad" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#00c8a0" stopOpacity="0.12" />
-          <stop offset="100%" stopColor="#00c8a0" stopOpacity="0" />
+        {/* ── Inject keyframes directly — guaranteed to work in React ── */}
+        <style>{`
+          @keyframes radarSweepCW {
+            from { transform: rotate(0deg);   }
+            to   { transform: rotate(360deg); }
+          }
+          .radar-arm {
+            transform-origin: 200px 200px;
+            animation: radarSweepCW 5s linear infinite;
+          }
+          .bp1 { animation: radarBlink 2.1s ease-in-out infinite; }
+          .bp2 { animation: radarBlink 3.4s ease-in-out infinite 0.6s; }
+          .bp3 { animation: radarBlink 1.8s ease-in-out infinite 1.1s; }
+          .bp4 { animation: radarBlink 2.7s ease-in-out infinite 0.3s; }
+          .bp5 { animation: radarBlink 4.0s ease-in-out infinite 0.9s; }
+          .bp6 { animation: radarBlink 3.0s ease-in-out infinite 1.5s; }
+          .bp7 { animation: radarBlink 2.5s ease-in-out infinite 0.7s; }
+          @keyframes radarBlink {
+            0%,100% { opacity: 0.95; }
+            50%      { opacity: 0.18; }
+          }
+        `}</style>
+
+        <radialGradient id="rg1" cx="50%" cy="50%" r="50%">
+          <stop offset="0%"   stopColor="#00c8a0" stopOpacity="0.10" />
+          <stop offset="100%" stopColor="#00c8a0" stopOpacity="0"    />
         </radialGradient>
-        <radialGradient id="sweepGrad" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#00c8a0" stopOpacity="0.4" />
-          <stop offset="100%" stopColor="#00c8a0" stopOpacity="0" />
+
+        {/* Sweep fan: bright at center edge, fading outward AND angularly */}
+        <linearGradient id="sweepFan" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%"   stopColor="#00c8a0" stopOpacity="0.0"  />
+          <stop offset="40%"  stopColor="#00c8a0" stopOpacity="0.35" />
+          <stop offset="100%" stopColor="#00c8a0" stopOpacity="0.0"  />
+        </linearGradient>
+
+        <radialGradient id="sweepRadial" cx="0%" cy="50%" r="100%">
+          <stop offset="0%"   stopColor="#00c8a0" stopOpacity="0.60" />
+          <stop offset="55%"  stopColor="#00c8a0" stopOpacity="0.22" />
+          <stop offset="100%" stopColor="#00c8a0" stopOpacity="0.0"  />
         </radialGradient>
+
+        {/* Blip glow filter */}
+        <filter id="glow" x="-80%" y="-80%" width="260%" height="260%">
+          <feGaussianBlur stdDeviation="2.8" result="b" />
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+
+        {/* Soft edge clip to circle */}
+        <clipPath id="radarClip">
+          <circle cx="200" cy="200" r="161" />
+        </clipPath>
       </defs>
-      {/* Grid rings */}
+
+      {/* Background fill */}
+      <circle cx="200" cy="200" r="160" fill="url(#rg1)" />
+
+      {/* Concentric rings */}
       {[160, 120, 80, 40].map((r, i) => (
         <circle key={r} cx="200" cy="200" r={r} fill="none"
-          stroke="rgba(0,200,160,0.12)" strokeWidth="1"
-          opacity={1 - i * 0.15} />
+          stroke="#00c8a0" strokeWidth={i === 0 ? 1.4 : 0.9}
+          opacity={[0.22, 0.16, 0.13, 0.10][i]} />
       ))}
-      <circle cx="200" cy="200" r="160" fill="url(#radarGrad)" />
-      {/* Cross lines */}
-      <line x1="200" y1="40" x2="200" y2="360" stroke="rgba(0,200,160,0.07)" strokeWidth="1" />
-      <line x1="40" y1="200" x2="360" y2="200" stroke="rgba(0,200,160,0.07)" strokeWidth="1" />
-      <line x1="87" y1="87" x2="313" y2="313" stroke="rgba(0,200,160,0.05)" strokeWidth="1" />
-      <line x1="313" y1="87" x2="87" y2="313" stroke="rgba(0,200,160,0.05)" strokeWidth="1" />
-      {/* Sweep */}
-      <g style={{ transformOrigin: '200px 200px', animation: 'radar 5s linear infinite' }}>
-        <path d="M200,200 L200,40 A160,160 0 0,1 360,200 Z" fill="url(#sweepGrad)" opacity="0.5" />
-        <line x1="200" y1="200" x2="200" y2="40" stroke="#00c8a0" strokeWidth="1.5" opacity="0.6" />
-      </g>
-      {/* Center dot */}
-      <circle cx="200" cy="200" r="5" fill="none" stroke="#00c8a0" strokeWidth="1.5" opacity="0.9" />
-      <circle cx="200" cy="200" r="2.5" fill="#00c8a0" />
-      {/* Threat blips */}
+
+      {/* 8 spoke lines every 45° */}
+      {[0, 45, 90, 135, 180, 225, 270, 315].map(a => {
+        const o = polar(a, 160);
+        return <line key={a} x1="200" y1="200" x2={o.x} y2={o.y}
+          stroke="#00c8a0" strokeWidth="0.6" opacity="0.09" />;
+      })}
+
+      {/* Outer tick marks every 30° */}
+      {Array.from({ length: 12 }, (_, i) => {
+        const a   = i * 30;
+        const p1  = polar(a, 155);
+        const p2  = polar(a, 163);
+        const maj = a % 90 === 0;
+        return <line key={a} x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y}
+          stroke="#00c8a0" strokeWidth={maj ? 1.6 : 0.7}
+          opacity={maj ? 0.55 : 0.22} />;
+      })}
+
+      {/* Degree labels at 0° 90° 180° 270° */}
       {[
-        { cx: 268, cy: 138, r: 4, c: '#00c8a0', dur: '2.1s' },
-        { cx: 145, cy: 252, r: 3, c: '#0074e8', dur: '3.4s' },
-        { cx: 290, cy: 240, r: 3, c: '#7b4fff', dur: '1.8s' },
-        { cx: 115, cy: 145, r: 2.5, c: '#ff6b35', dur: '2.7s' },
-        { cx: 230, cy: 300, r: 2.5, c: '#00c8a0', dur: '4s' },
-      ].map((b, i) => (
-        <circle key={i} cx={b.cx} cy={b.cy} r={b.r} fill={b.c}>
-          <animate attributeName="opacity" values="0.9;0.2;0.9" dur={b.dur} repeatCount="indefinite" />
+        { angle: 0,   label: '000°' },
+        { angle: 90,  label: '090°' },
+        { angle: 180, label: '180°' },
+        { angle: 270, label: '270°' },
+      ].map(({ angle, label }) => {
+        const p = polar(angle, 171);
+        return (
+          <text key={label} x={p.x} y={p.y}
+            fontSize="8" fill="rgba(0,200,160,0.55)"
+            fontFamily="JetBrains Mono,monospace"
+            textAnchor="middle" dominantBaseline="middle">
+            {label}
+          </text>
+        );
+      })}
+
+      {/* ════ CLOCKWISE SWEEP ARM ════ */}
+      <g className="radar-arm" clipPath="url(#radarClip)">
+        {/* Wide fan wedge (~85° arc) */}
+        <path d="M200,200 L200,40 A160,160 0 0,1 360,200 Z"
+          fill="url(#sweepRadial)" opacity="0.70" />
+        {/* Leading edge */}
+        <line x1="200" y1="200" x2="200" y2="40"
+          stroke="#00c8a0" strokeWidth="2.0" opacity="0.85" strokeLinecap="round" />
+        {/* Bright tip on the outer ring */}
+        <circle cx="200" cy="40" r="3.5" fill="#00c8a0" opacity="1">
+          <animate attributeName="r" values="3.5;5;3.5" dur="1s" repeatCount="indefinite" />
+          <animate attributeName="opacity" values="1;0.5;1" dur="1s" repeatCount="indefinite" />
         </circle>
-      ))}
-      {/* Ring decorations */}
-      {[8, 24, 40, 56].map((deg, i) => (
-        <text key={i} x="205" y="46" fontSize="7" fill="rgba(0,200,160,0.35)"
-          fontFamily="JetBrains Mono" textAnchor="middle"
-          transform={`rotate(${deg * 10} 200 200)`}>{(deg * 10).toString().padStart(3, '0')}°</text>
-      ))}
+        {/* Trailing fade lines for motion blur feel */}
+        <line x1="200" y1="200" x2="360" y2="200"
+          stroke="#00c8a0" strokeWidth="0.8" opacity="0.18" />
+      </g>
+
+      {/* Center crosshair */}
+      <circle cx="200" cy="200" r="6.5" fill="none" stroke="#00c8a0" strokeWidth="1.2" opacity="0.55" />
+      <circle cx="200" cy="200" r="2.8" fill="#00c8a0" />
+      <line x1="193" y1="200" x2="207" y2="200" stroke="#00c8a0" strokeWidth="0.9" opacity="0.45" />
+      <line x1="200" y1="193" x2="200" y2="207" stroke="#00c8a0" strokeWidth="0.9" opacity="0.45" />
+
+      {/* ════ HIGH-VALUE BLIPS on outer rings ════ */}
+      {blips.map((b) => {
+        const { x, y } = polar(b.angle, b.r);
+        return (
+          <g key={b.cls} className={b.cls} filter="url(#glow)">
+            {/* Outer glow halo */}
+            {b.ring && (
+              <circle cx={x} cy={y} r={b.size + 4}
+                fill="none" stroke={b.color} strokeWidth="1"
+                opacity="0.4" />
+            )}
+            {/* Main dot */}
+            <circle cx={x} cy={y} r={b.size} fill={b.color} opacity="0.95" />
+            {/* Bright core */}
+            <circle cx={x} cy={y} r={b.size * 0.38} fill="white" opacity="0.65" />
+          </g>
+        );
+      })}
     </svg>
   );
 }
@@ -177,17 +288,17 @@ export default function Hero() {
 
           {/* Right: radar */}
           <motion.div initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1.2, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 1.2, delay: 0.3 }}
             className="hidden lg:flex items-center justify-center">
             <div className="relative w-[380px] h-[380px]">
               <div className="absolute inset-0 rounded-full bg-teal/5 border border-teal/10" />
               <RadarSVG />
-              {/* Floating tags */}
+              {/* Floating framework tags */}
               {[
-                { label: 'NIST CSF 2.0', pos: 'top-2 left-0', delay: 0.8 },
-                { label: 'ISO 27001', pos: 'top-10 right-0', delay: 1.0 },
-                { label: 'Zero Trust', pos: 'bottom-10 left-0', delay: 1.2 },
-                { label: 'AI Security', pos: 'bottom-2 right-0', delay: 1.4 },
+                { label: 'NIST CSF 2.0', pos: 'top-2 left-0',    delay: 0.8 },
+                { label: 'ISO 27001',    pos: 'top-10 right-0',   delay: 1.0 },
+                { label: 'Zero Trust',   pos: 'bottom-10 left-0', delay: 1.2 },
+                { label: 'AI Security',  pos: 'bottom-2 right-0', delay: 1.4 },
               ].map(t => (
                 <motion.div key={t.label}
                   initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }}
