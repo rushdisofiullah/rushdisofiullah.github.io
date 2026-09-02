@@ -5,7 +5,7 @@ import react from '@vitejs/plugin-react'
 // For GitHub Pages with repo subpath: base: '/your-repo-name/'
 export default defineConfig({
   plugins: [react()],
-  base: '/sofiullah-portfolio/',
+  base: '/',
   build: {
     outDir: 'dist',
     sourcemap: false,
