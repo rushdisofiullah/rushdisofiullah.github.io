@@ -94,8 +94,7 @@ Dhaka, Bangladesh
 ```
 B.Sc. Computer Science & IT
 Islamic University of Technology
-(IUT, OIC) — CGPA 3.48/4.00
-OIC Full Scholarship
+(IUT, OIC) — OIC Full Scholarship
 ```
 
 </td>
