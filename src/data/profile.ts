@@ -3,7 +3,7 @@ export const profile = {
   nameShort: "Sofi Ullah",
   initials: "AHMS",
   titles: [
-    "Senior General Manager – Cybersecurity",
+    // "Senior General Manager – Cybersecurity",
     "Enterprise Security Architect",
     "Cyber Risk & Resilience Executive",
     "GRC & ISMS Leader",
@@ -198,9 +198,9 @@ export const profile = {
     { title: "Industry Vulnerability Remediation Benchmark", year: "2018", desc: "Established a recurring vulnerability identification, prioritization, and remediation program that became an industry benchmark in Bangladesh telecom.", icon: "RefreshCw", color: "violet" },
   ],
   education: [
-    { degree: "B.Sc. – Computer Science & Information Technology", institution: "Islamic University of Technology (IUT, OIC)", year: "2011", gpa: "3.48 / 4.00", note: "OIC Full Scholarship", icon: "GraduationCap" },
-    { degree: "Higher Secondary Certificate (HSC)", institution: "Cumilla Cadet College", year: "2007", gpa: "GPA 5.00 – Golden A+", icon: "BookOpen" },
-    { degree: "Secondary School Certificate (SSC)", institution: "Cumilla Cadet College", year: "2005", gpa: "GPA 5.00 – Golden A+", icon: "BookOpen" },
+    { degree: "B.Sc. – Computer Science & Information Technology", institution: "Islamic University of Technology (IUT, OIC)", year: "2011", note: "OIC Full Scholarship", icon: "GraduationCap" },
+    { degree: "Higher Secondary Certificate (HSC)", institution: "Cumilla Cadet College", year: "2007", note: "Golden A+", icon: "GraduationCap"},
+    { degree: "Secondary School Certificate (SSC)", institution: "Cumilla Cadet College", year: "2005", note: "Golden A+", icon: "GraduationCap"},
   ],
   certifications: [
     { name: "CISSP Training", issuer: "InfosecTrain", status: "training", color: "teal" },
